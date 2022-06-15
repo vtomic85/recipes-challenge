@@ -3,14 +3,20 @@ import Pagination from "./components/pagination/Pagination";
 import RecipesList from "./components/recipes-list/RecipesList";
 import "./App.css";
 import RecipeFilter from "./components/recipe-filter/RecipeFilter";
+import ErrorMessage from "./components/error-message/ErrorMessage";
 
 function App() {
   // Default page will be 1 whenever something changes (e.g. filter value)
   const [activePage, setActivePage] = useState(0);
+
   // Total number of pages (for the Pagination widget)
   const [totalPages, setTotalPages] = useState(0);
+
   // List of recipes to show
   const [recipes, setRecipes] = useState([]);
+
+  // Notify the user if an error happens
+  const [errorState, setErrorState] = useState(false);
 
   // A function which will fetch recipes from the API, with or without search query (filter) or page number
   const fetchRecipes = (search, page) => {
@@ -18,7 +24,6 @@ function App() {
     let URL = `${process.env.REACT_APP_BACKEND_URL}${
       search !== null ? "?search=" + search : ""
     }${page !== null ? "?page=" + page : ""}`;
-
     // Call the API and set the recipes list, the active page number and the total number of pages
     fetch(URL)
       .then((res) => res.json())
@@ -26,7 +31,9 @@ function App() {
         setRecipes(data.recipes);
         setActivePage(data.currentPage);
         setTotalPages(data.totalPages);
-      });
+        setErrorState(false);
+      })
+      .catch((err) => setErrorState(true));
   };
 
   // Do the real call when the page loads
@@ -40,7 +47,7 @@ function App() {
       method: "DELETE",
     })
       .then((res) => fetchRecipes(null, null))
-      .catch((err) => console.log("Handle the exception if needed"));
+      .catch((err) => setErrorState(true));
   };
 
   // When a user clicks a new page, call the API with the "page" parameter
@@ -64,6 +71,7 @@ function App() {
         siblings={1}
         onPageChange={onPageChange}
       />
+      {errorState && <ErrorMessage />}
     </div>
   );
 }
