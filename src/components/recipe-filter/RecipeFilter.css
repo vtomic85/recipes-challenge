@@ -1,0 +1,7 @@
+.filterContainer {
+  margin: 5px;
+}
+
+input:focus {
+  background-color: #fff3f1;
+}
